@@ -7,9 +7,23 @@ on:
    branches: [ main ]
 
 jobs:
- test:
-   runs-on: ubuntu-latest
-   steps:
+   test:
+     runs-on: ubuntu-latest
+     services:
+       postgres:
+        image: postgres:latest
+        env:
+          POSTGRES_USER: user
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: mytestdb  # <-- Dedicated test DB name
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5jobs:
+steps:
      - uses: actions/checkout@v3
      - uses: actions/setup-python@v4
        with:
@@ -25,6 +39,8 @@ jobs:
            ${{ runner.os }}-pip-
 
      - name: Install dependencies
+       env:
+          DATABASE_URL: postgresql://user:password@localhost:5432/mytestdb
        run: |
          python -m venv venv
          source venv/bin/activate
