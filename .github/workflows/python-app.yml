@@ -1,55 +1,59 @@
 name: CI/CD
 
 on:
- push:
-   branches: [ main ]
- pull_request:
-   branches: [ main ]
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
-   test:
-     runs-on: ubuntu-latest
-     services:
-       postgres:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
         image: postgres:latest
         env:
           POSTGRES_USER: user
           POSTGRES_PASSWORD: password
-          POSTGRES_DB: mytestdb  # <-- Dedicated test DB name
+          POSTGRES_DB: mytestdb
         ports:
           - 5432:5432
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
           --health-timeout 5s
-          --health-retries 5jobs:
-     steps:
-     - uses: actions/checkout@v3
-     - uses: actions/setup-python@v4
-       with:
-         python-version: '3.13'
-         
-     - uses: actions/cache@v3
-       with:
-         path: |
-           venv
-           ~/.cache/pip
-         key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-         restore-keys: |
-           ${{ runner.os }}-pip-
+          --health-retries 5
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.13'
+          
+      - uses: actions/cache@v3
+        with:
+          path: |
+            venv
+            ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
 
-     - name: Install dependencies
-       env:
+      - name: Install dependencies
+        env:
           DATABASE_URL: postgresql://user:password@localhost:5432/mytestdb
-       run: |
-         python -m venv venv
-         source venv/bin/activate
-         pip install -r requirements.txt
-         playwright install
+        run: |
+          python -m venv venv
+          source venv/bin/activate
+          pip install -r requirements.txt
+          playwright install
 
-     - name: Run tests
-       run: |
-         source venv/bin/activate
-         pytest tests/unit/ --cov=src --junitxml=test-results/junit.xml
-         pytest tests/integration/
-         pytest tests/e2e/
+      - name: Run tests
+        env:
+          DATABASE_URL: postgresql://user:password@localhost:5432/mytestdb
+        run: |
+          source venv/bin/activate
+          pytest tests/unit/ --cov=src --junitxml=test-results/junit.xml
+          pytest tests/integration/
+          pytest tests/e2e/
