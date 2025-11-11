@@ -1,6 +1,7 @@
 # FastAPI Calculator with Secure User Authentication
 
 A production-ready FastAPI application featuring a calculator API with secure user authentication, built with SQLAlchemy, Pydantic, and PostgreSQL. The project includes comprehensive testing, CI/CD automation, and Docker containerization.
+Link to Docker Hub: https://hub.docker.com/repository/docker/cerechukwu27/cerechukwu27_mod10/general
 
 ## Table of Contents
 
